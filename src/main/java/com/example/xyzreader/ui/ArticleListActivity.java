@@ -1,6 +1,5 @@
 package com.example.xyzreader.ui;
 
-import android.app.ActivityOptions;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +15,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -25,6 +26,11 @@ import com.example.xyzreader.R;
 import com.example.xyzreader.data.ArticleLoader;
 import com.example.xyzreader.data.ItemsContract;
 import com.example.xyzreader.data.UpdaterService;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * An activity representing a list of Articles. This activity has different presentations for
@@ -38,6 +44,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     private Toolbar mToolbar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
+    private static final String TAG = ArticleListActivity.class.toString();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +57,13 @@ public class ArticleListActivity extends AppCompatActivity implements
 
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        //refresh list
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refresh();
+            }
+        });
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         getSupportLoaderManager().initLoader(0, null, this);
@@ -60,7 +74,9 @@ public class ArticleListActivity extends AppCompatActivity implements
     }
 
     private void refresh() {
+        mSwipeRefreshLayout.setRefreshing(true);
         startService(new Intent(this, UpdaterService.class));
+
     }
 
     @Override
@@ -74,6 +90,13 @@ public class ArticleListActivity extends AppCompatActivity implements
     protected void onStop() {
         super.onStop();
         unregisterReceiver(mRefreshingReceiver);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean("updateData", false);
+
+        super.onSaveInstanceState(outState);
     }
 
     private boolean mIsRefreshing = false;
@@ -112,7 +135,7 @@ public class ArticleListActivity extends AppCompatActivity implements
 
     @Override
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
-
+        mRecyclerView.setAdapter(null);
     }
 
 
@@ -138,32 +161,43 @@ public class ArticleListActivity extends AppCompatActivity implements
                 public void onClick(View view) {
                     Intent intent = new Intent(Intent.ACTION_VIEW,
                             ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition())));
-                    ActivityOptions opts = ActivityOptions.makeScaleUpAnimation(
-                            // the source view from which to animate the new Activity
-                            // defines the co-ordinate space for initial (x, y) location
-                            view,
-                            // starting (x, y) position for animation
-                            // NOTE: these co-ordinates are relative to the source view above
-                            0, 0,
-                            // initial width and height of the new Activity
-                            view.getWidth(), view.getHeight());
-                    startActivity(intent, opts.toBundle());
+                    startActivity(intent);
                 }
             });
             return vh;
+        }
+
+
+        private Date parsePublishedDate() {
+            try {
+                String date = mCursor.getString(ArticleLoader.Query.PUBLISHED_DATE);
+                return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss").parse(date);
+            } catch (ParseException ex) {
+                Log.e(TAG, ex.getMessage());
+                return new Date();
+            }
         }
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             mCursor.moveToPosition(position);
             holder.titleView.setText(mCursor.getString(ArticleLoader.Query.TITLE));
-            holder.subtitleView.setText(
-                    DateUtils.getRelativeTimeSpanString(
-                            mCursor.getLong(ArticleLoader.Query.PUBLISHED_DATE),
-                            System.currentTimeMillis(), DateUtils.HOUR_IN_MILLIS,
-                            DateUtils.FORMAT_ABBREV_ALL).toString()
-                            + " by "
-                            + mCursor.getString(ArticleLoader.Query.AUTHOR));
+            Date pdate = parsePublishedDate();
+            if (!pdate .before(new GregorianCalendar(2,1,1).getTime())) {
+
+                holder.subtitleView.setText(Html.fromHtml(
+                        DateUtils.getRelativeTimeSpanString(
+                                pdate.getTime(),
+                                System.currentTimeMillis(), DateUtils.HOUR_IN_MILLIS,
+                                DateUtils.FORMAT_ABBREV_ALL).toString()
+                                + "<br/>" + " by "
+                                + mCursor.getString(ArticleLoader.Query.AUTHOR)));
+            } else {
+                holder.subtitleView.setText(Html.fromHtml(
+                        new SimpleDateFormat().format(pdate)
+                                + "<br/>" + " by "
+                                + mCursor.getString(ArticleLoader.Query.AUTHOR)));
+            }
             holder.thumbnailView.setImageUrl(
                     mCursor.getString(ArticleLoader.Query.THUMB_URL),
                     ImageLoaderHelper.getInstance(ArticleListActivity.this).getImageLoader());
