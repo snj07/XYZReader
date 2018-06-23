@@ -164,30 +164,13 @@ public class ArticleDetailFragment extends Fragment implements
 
             Date pDate = null;
             try {
-                pDate = new SimpleDateFormat().parse( mCursor.getString(ArticleLoader.Query.PUBLISHED_DATE));
+                pDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse( mCursor.getString(ArticleLoader.Query.PUBLISHED_DATE));
             } catch (ParseException e) {
                 Log.e(TAG, e.getMessage());
                 pDate = new Date();
             }
 
-            if (!pDate.before(new GregorianCalendar(2,1,1).getTime())) {
-                bylineView.setText(Html.fromHtml(
-                        DateUtils.getRelativeTimeSpanString(
-                                pDate.getTime(),
-                                System.currentTimeMillis(), DateUtils.HOUR_IN_MILLIS,
-                                DateUtils.FORMAT_ABBREV_ALL).toString()
-                                + " by <font color='#ffffff'>"
-                                + mCursor.getString(ArticleLoader.Query.AUTHOR)
-                                + "</font>"));
-
-            } else {
-                // show string for date before 1902
-                bylineView.setText(Html.fromHtml(
-                        new SimpleDateFormat().format(pDate) + " by <font color='#ffffff'>"
-                                + mCursor.getString(ArticleLoader.Query.AUTHOR)
-                                + "</font>"));
-
-            }
+            bylineView.setText(Html.fromHtml(mCursor.getString(ArticleLoader.Query.AUTHOR)+"<br/>"+new SimpleDateFormat("MMM d, yyyy").format(pDate)));
 
             bodyView.setText(Html.fromHtml(mCursor.getString(ArticleLoader.Query.BODY).replaceAll("(\r\n|\n)", "<br />")));
 
@@ -214,7 +197,7 @@ public class ArticleDetailFragment extends Fragment implements
                         }
                     });
         } else {
-           // mRootView.setVisibility(View.GONE);
+           mRootView.setVisibility(View.GONE);
             titleView.setText("N/A");
             bylineView.setText("N/A");
             bodyView.setText("N/A");

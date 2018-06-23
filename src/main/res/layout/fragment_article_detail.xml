@@ -16,45 +16,47 @@
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/toolbar_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:toolbarId="@+id/toolbar">
 
 
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <ImageView
+                android:id="@+id/photo"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/article_detail_fragment_detail_image_height"
+                android:fitsSystemWindows="true"
+                android:scaleType="centerCrop"
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="0.7" />
+
+
+            <View
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <FrameLayout
-                    android:id="@+id/photo_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/photo_placeholder">
-
-                    <ImageView
-                        android:id="@+id/photo"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/article_detail_fragment_detail_image_height"
-                        android:scaleType="centerCrop"
-                        app:layout_collapseMode="parallax"
-                        app:layout_collapseParallaxMultiplier="0.7" />
+                android:background="@drawable/photo_background_protection"
+                android:fitsSystemWindows="true" />
 
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/article_detail_fragment_detail_image_height"
-                        android:background="@drawable/photo_background_protection" />
-                </FrameLayout>
+            <FrameLayout
+                android:id="@+id/frame_layout_collapsing_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha=".5"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+
+                android:fitsSystemWindows="true"
+                app:layout_collapseMode="parallax">
 
                 <LinearLayout
                     android:id="@+id/linear_layout_data"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:background="#333"
+                    android:gravity="left"
                     android:orientation="vertical"
                     android:paddingBottom="@dimen/detail_metabar_vert_padding"
                     android:paddingLeft="@dimen/detail_inner_horiz_margin"
@@ -66,9 +68,12 @@
                         style="?android:attr/textAppearanceLarge"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:ellipsize="end"
                         android:fontFamily="sans-serif-condensed"
                         android:lineSpacingMultiplier="0.9"
+                        android:maxLines="2"
                         android:paddingBottom="@dimen/detail_metabar_title_bottom_padding"
+                        android:textAppearance="?attr/titleTextAppearance"
                         android:textColor="#fff"
                         android:textSize="@dimen/detail_title_text_size"
                         android:textStyle="bold" />
@@ -78,10 +83,10 @@
                         style="?android:attr/textAppearanceSmall"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-
-                        android:textColor="#8fff" />
+                        android:textSize="@dimen/detail_body_text_size" />
                 </LinearLayout>
-            </LinearLayout>
+
+            </FrameLayout>
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -94,44 +99,72 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v4.widget.NestedScrollView
+   <!-- <android.support.v4.widget.NestedScrollView
         android:id="@+id/movie_detail_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
             android:background="#fff"
             android:elevation="2dp"
-            android:maxWidth="@dimen/detail_card_max_width"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/article_body"
                 style="?android:attr/textAppearanceMedium"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginLeft="@dimen/detail_inner_horiz_margin"
                 android:layout_marginRight="@dimen/detail_inner_horiz_margin"
-                android:lineSpacingMultiplier="@fraction/detail_body_line_spacing_multiplier"
+                android:padding="@dimen/detail_body_text_padding"
                 android:textSize="@dimen/detail_body_text_size" />
 
         </LinearLayout>
-    </android.support.v4.widget.NestedScrollView>
+    </android.support.v4.widget.NestedScrollView>-->
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/movie_detail_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:elevation="2dp"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/article_body"
+                style="?android:attr/textAppearanceMedium"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:linksClickable="true"
+                android:paddingRight="@dimen/detail_body_text_padding"
+                android:paddingLeft="@dimen/detail_body_text_padding"
+                android:textColor="#888"
+                android:textSize="@dimen/detail_body_text_size"
+                android:textColorLink="?colorAccent" />
+
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/share_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:elevation="@dimen/fab_elevation"
-        app:fabSize="normal"
-        app:rippleColor="@android:color/white"
-        app:elevation="@dimen/fab_elevation"
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
+        android:elevation="@dimen/fab_elevation"
+        app:elevation="@dimen/fab_elevation"
+        app:fabSize="normal"
+        app:rippleColor="@android:color/white"
         app:srcCompat="@drawable/ic_share" />
 </android.support.design.widget.CoordinatorLayout>
