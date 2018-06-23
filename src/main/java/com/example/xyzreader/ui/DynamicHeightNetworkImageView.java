@@ -1,6 +1,11 @@
 package com.example.xyzreader.ui;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
 
 import com.android.volley.toolbox.NetworkImageView;
@@ -8,6 +13,8 @@ import com.android.volley.toolbox.NetworkImageView;
 public class DynamicHeightNetworkImageView extends NetworkImageView {
     private float mAspectRatio = 1.5f;
 
+    //Fade in time in msec
+    private static final int FADE_IN_TIME = 250;
     public DynamicHeightNetworkImageView(Context context) {
         super(context);
     }
@@ -30,5 +37,16 @@ public class DynamicHeightNetworkImageView extends NetworkImageView {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int measuredWidth = getMeasuredWidth();
         setMeasuredDimension(measuredWidth, (int) (measuredWidth / mAspectRatio));
+        setScaleType(ScaleType.CENTER_CROP);
+    }
+
+    @Override
+    public void setImageBitmap(Bitmap bm) {
+        TransitionDrawable td = new TransitionDrawable(new Drawable[]{
+                new ColorDrawable(getResources().getColor(android.R.color.transparent)),
+                new BitmapDrawable(getContext().getResources(), bm)
+        });
+        setImageDrawable(td);
+        td.startTransition(FADE_IN_TIME);
     }
 }

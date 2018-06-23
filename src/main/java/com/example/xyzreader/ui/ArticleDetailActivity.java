@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +34,7 @@ public class ArticleDetailActivity extends AppCompatActivity
     private long mSelectedItemId;
     private int mSelectedItemUpButtonFloor = Integer.MAX_VALUE;
     private int mTopInset;
-
+    private final String TAG = this.getClass().getCanonicalName();
     private ViewPager mPager;
     private MyPagerAdapter mPagerAdapter;
    // private View mUpButtonContainer;
@@ -49,7 +50,10 @@ public class ArticleDetailActivity extends AppCompatActivity
         }
         setContentView(R.layout.activity_article_detail);
 
-
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         getSupportLoaderManager().initLoader(0, null, this);
 
         mPagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
@@ -70,8 +74,10 @@ public class ArticleDetailActivity extends AppCompatActivity
             public void onPageSelected(int position) {
                 if (mCursor != null) {
                     mCursor.moveToPosition(position);
+                    mSelectedItemId = mCursor.getLong(ArticleLoader.Query._ID);
+                }else{
+                    Log.e(TAG, "Error on page select");
                 }
-                mSelectedItemId = mCursor.getLong(ArticleLoader.Query._ID);
 
             }
         });
